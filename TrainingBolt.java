@@ -15,6 +15,9 @@ import static backtype.storm.utils.Utils.tuple;
 public class TrainingBolt extends BaseRichBolt {
 
 	OutputCollector collector;
+	
+	String customProperty;
+	
 	public static final Logger LOG = Logger.getLogger(TrainingBolt.class);
 	
 	@Override
@@ -22,9 +25,11 @@ public class TrainingBolt extends BaseRichBolt {
 			OutputCollector collector) {
 		this.collector = collector;
 		
-		String customProperty = (String) stormConf.get("training.bolt.property");
-		if (customProperty == null)
+		customProperty = (String) stormConf.get("training.bolt.property");
+		if (customProperty == null){
 			customProperty = "";
+			LOG.warn("Training bolt property not set, using default value");
+		}
 	}
 
 	@Override
@@ -32,7 +37,8 @@ public class TrainingBolt extends BaseRichBolt {
 		
 		String inputMessage = new String(input.getBinary(0));
 		
-		String outputMessage = inputMessage + " -- Training Bolt Custom Porperty: { " +  " }";
+		String outputMessage = inputMessage + " -- Training Bolt Custom Porperty: { " 
+				+ customProperty + " }";
 		
 		collector.emit(tuple(outputMessage));
 	}
